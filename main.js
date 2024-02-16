@@ -11,6 +11,7 @@ const preGame = document.querySelector('.preGame');
 const inGame = document.querySelector('.inGame');
 
 let tablero;
+
 //Boton de crear tablero y validación de input
 buttonCreateTable.addEventListener('click', (e) => {
   if (!inputDimensions.value) {

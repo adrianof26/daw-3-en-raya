@@ -256,18 +256,6 @@ class Tablero {
       j: j
     }
   }
-  //Programar la funcionalidad de pedir el número de rondas que se quieren jugar al principio. El programa debe jugar ese número de rondas y cuando llegue a dicho número deberá anunciar el ganador final.
-  rondasJuego(){
-    let rondas = prompt('¿Cuántas rondas quieres jugar?');
-    if (rondas === null || rondas === '') {
-      rondas = 1;
-    }
-    for (let i = 0; i < rondas; i++) {
-      this.limpiar();
-      this.imprimir();
-    }
-    this.#marcador.mostrarMarcador();
-  }
 }
 
 export default Tablero;

@@ -34,6 +34,18 @@ class Marcador {
     marcadorFrontend.innerHTML = '';
     marcadorFrontend.append(ul);
   }
+
+  //Programar la funcionalidad de pedir el número de rondas que se quieren jugar al principio. El programa debe jugar ese número de rondas y cuando llegue a dicho número deberá anunciar el ganador final.
+
+  rondas() {
+    let numeroRondas = prompt('¿Cuántas rondas quieres jugar?');
+    for (let i = 0; i < numeroRondas; i++) {
+      let tablero = new Tablero(3, false);
+      tablero.imprimir('tablero');
+      preGame.classList.toggle('hide');
+      inGame.classList.toggle('hide');
+    }
+  }
 }
 
 export default Marcador;
