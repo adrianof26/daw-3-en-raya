@@ -11,7 +11,7 @@ const preGame = document.querySelector('.preGame');
 const inGame = document.querySelector('.inGame');
 
 let tablero;
-
+//Boton de crear tablero y validación de input
 buttonCreateTable.addEventListener('click', (e) => {
   if (!inputDimensions.value) {
     Toastify({
@@ -60,17 +60,17 @@ buttonCreateTable.addEventListener('click', (e) => {
   preGame.classList.toggle('hide');
   inGame.classList.toggle('hide');
 });
-
+//Validación de input de dimensiones
 inputDimensions.addEventListener('keydown', () => {
   inputDimensions.classList.remove('error');
 });
-
+//Botones de limpiar el juego
 for (let button of clearButtons) {
   button.addEventListener('click', () => {
     tablero.limpiar();
   });
 }
-
+//Boton de reset del juego entero
 resetButton.addEventListener('click', (e) => {
   document.getElementById(tablero.elementID).innerHTML = '';
   document.getElementById('marcador').innerHTML = '';
