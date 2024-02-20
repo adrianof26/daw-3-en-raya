@@ -11,41 +11,56 @@ class Marcador {
       puntos: 0,
     }
   ]
+  #numPartidas;
 
-  constructor(elementId='marcador') {
+  constructor(elementId='marcador', numPartidas=1) {
     this.#elementId = elementId;
+    this.#numPartidas = numPartidas;
     this.imprimir();
   }
 
   addPuntos(name) {
     let jugador = this.#jugadores.find(j => j.name === name);
     jugador.puntos++;
+    if (this.#numPartidas > 0) {
+      this.#numPartidas--;
+    }
     this.imprimir();
   }
 
   imprimir() {
     let marcadorFrontend = document.getElementById(this.#elementId);
     let ul = document.createElement('ul');
+    let linumPartidas = document.createElement('li');
     this.#jugadores.forEach(jugador => {
       let li = document.createElement('li');
       li.textContent = `Jugador ${jugador.name} tiene ${jugador.puntos} puntos`;
       ul.append(li);
     });
+    linumPartidas.textContent = `Partidas restantes: ${this.#numPartidas}`;
+    ul.append(linumPartidas);
     marcadorFrontend.innerHTML = '';
     marcadorFrontend.append(ul);
   }
+  
 
-  //Programar la funcionalidad de pedir el número de rondas que se quieren jugar al principio. El programa debe jugar ese número de rondas y cuando llegue a dicho número deberá anunciar el ganador final.
-
-  rondas() {
-    let numeroRondas = prompt('¿Cuántas rondas quieres jugar?');
-    for (let i = 0; i < numeroRondas; i++) {
-      let tablero = new Tablero(3, false);
-      tablero.imprimir('tablero');
-      preGame.classList.toggle('hide');
-      inGame.classList.toggle('hide');
-    }
+  getJugadores() {
+    return this.#jugadores;
   }
+
+  getNumPartidas() {
+    return this.#numPartidas;
+  }
+
+  getRondasJugadas() {
+    return this.#jugadores.reduce((acc, jugador) => acc + jugador.puntos, 0);
+  }
+
+  getRondas(){
+    return this.#numPartidas;
+  }
+
+  
 }
 
 export default Marcador;

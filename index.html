@@ -10,6 +10,9 @@
     <div class="preGame">
       <label for="dimension">De qué tamaño quieres el tablero</label>
       <input id="dimension" type="text" name="dimension">
+      <div> <label for="numPartidas">Número de partidas</label>
+        <input id="numPartidas" type="text" name="numPartidas">
+      </div>
       <button id="createTable">Crear tablero</button>
       <label for="machine"><input type="checkbox" name="machine" id="machine"> Jugar contra la máquina</label>
     </div>
@@ -20,6 +23,7 @@
     <div id="marcador"></div>
     <div id="tablero"></div>
     <div class="clearGame"><button class="clearGameButton">Volver a jugar</button></div>
+    <div id="registroJugadas"></div>
     <script type="module" src="/main.js"></script>
   </body>
 </html>

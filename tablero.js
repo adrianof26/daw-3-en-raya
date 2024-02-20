@@ -1,50 +1,92 @@
-import Toastify from 'toastify-js'
-import "toastify-js/src/toastify.css"
+import Toastify from 'toastify-js';
+import 'toastify-js/src/toastify.css';
 import Marcador from './marcador';
 
 class Tablero {
-  #casillas;  // Este será el array de arrays donde guardaremos lo que hay en cada posición
-  #dimension; // Esta variable determinará el tamaño del tablero
-  #turno;     // En esta variable queda guardo a quien le toca, toma valores: X o O
+  #casillas;
+  #dimension;
+  #turno;
   #elementID;
   #marcador;
   #versusMachine;
   #endGame = false;
+  #registroJugadas;
+  #maxRondas;
 
-  constructor(dimension = 3, versusMachine=false) {
+  constructor(dimension = 3, versusMachine = false, maxRondas = 3) {
+    let numPartidas = document.getElementById('numPartidas').value;
     this.#casillas = new Array();
     this.#dimension = dimension;
     this.#versusMachine = versusMachine;
-    for (let i = 0; i <this.#dimension; i++){
+    this.#maxRondas = maxRondas;
+    for (let i = 0; i < this.#dimension; i++) {
       this.#casillas[i] = new Array();
       for (let j = 0; j < this.#dimension; j++) {
         this.#casillas[i][j] = null;
       }
     }
+    let elementID = 'marcador';
     this.#turno = 'X';
-    this.#marcador = new Marcador();
+    this.#marcador = new Marcador(elementID, numPartidas);
+    this.#registroJugadas = [];
   }
 
-  imprimir(elementId='tablero') {
+  imprimir(elementId = 'tablero') {
     let tablero = document.getElementById(elementId);
     this.#elementID = elementId;
     tablero.innerHTML = '';
-    for (let fila = 0; fila < this.#dimension; fila++){
-      for (let columna = 0; columna < this.#dimension; columna++){
+    
+    for (let fila = 0; fila < this.#dimension; fila++) {
+      for (let columna = 0; columna < this.#dimension; columna++) {
         let casilla = document.createElement('div');
         casilla.dataset.fila = fila;
         casilla.dataset.columna = columna;
-        casilla.dataset.libre = '';
-        if (this.#casillas[fila][columna]) {
-          casilla.textContent = this.#casillas[fila][columna];
-          casilla.dataset.libre = this.#casillas[fila][columna];
-        }
+        casilla.dataset.libre = this.#casillas[fila][columna] || ''; // asignamos directamente el valor de la casilla
+        
+        // Crear elemento de imagen
+        let imagen = document.createElement('img');
+        imagen.classList.add('ficha');
+  
+        // Agregar la imagen a la casilla
+        casilla.appendChild(imagen);
+  
         tablero.appendChild(casilla);
         this.addEventClick(casilla);
       }
     }
+    
+    this.actualizarImagenes(); // Llamamos a la función para inicializar las imágenes
+
     tablero.style.gridTemplateColumns = `repeat(${this.#dimension}, 1fr)`;
   }
+
+actualizarImagenes() {
+  // Iterar sobre las casillas y actualizar las imágenes según el valor de la casilla
+  let casillas = document.querySelectorAll('[data-fila][data-columna]');
+  casillas.forEach(casilla => {
+    let fila = casilla.dataset.fila;
+    let columna = casilla.dataset.columna;
+    let imagen = casilla.querySelector('img');
+
+    if (this.#casillas[fila][columna] === 'X') {
+      imagen.src = './docs/assets/X.jpg';
+    } else if (this.#casillas[fila][columna] === 'O') {
+      imagen.src = './docs/assets/O.png';
+    }
+  });
+}
+
+// Modifica la función setCasilla para que llame a la función actualizarImagenes
+setCasilla(fila, columna, valor) {
+  if (this.isFree(fila, columna)) {
+    this.#casillas[fila][columna] = valor;
+    this.actualizarImagenes(); // Actualizamos las imágenes después de cada movimiento
+    return true;
+  }
+  return false;
+}
+
+  
 
   isFree(fila, columna) {
     return true ? this.#casillas[fila][columna] === null : false;
@@ -67,29 +109,26 @@ class Tablero {
 
     if (this.#turno === 'X') {
       this.#turno = 'O';
-      //Comprobamos si jugamos contra la máquina
       if (this.#versusMachine) {
         let posicionLibre = this.getCasillaFreeRandom();
         this.setCasilla(posicionLibre.i, posicionLibre.j, 'O');
         this.imprimir();
-        this.comprobarResultados()
+        this.comprobarResultados();
         if (this.#endGame) return false;
         this.toogleTurno();
       }
-
     } else {
       this.#turno = 'X';
     }
   }
 
   comprobarResultados() {
-    // Comprobamos filas
     let fila;
     let columna;
     let ganado = false;
-    for (fila = 0; fila < this.#dimension && !ganado; fila++){
+    for (fila = 0; fila < this.#dimension && !ganado; fila++) {
       let seguidas = 0;
-      for (columna = 0; columna < this.#dimension; columna++){
+      for (columna = 0; columna < this.#dimension; columna++) {
         if (columna !== 0) {
           if (this.getCasilla(fila, columna) === this.getCasilla(fila, columna - 1)) {
             if (this.getCasilla(fila, columna) !== null) {
@@ -104,12 +143,11 @@ class Tablero {
       }
     }
 
-    // Comprobar columnas
-    for (columna = 0; columna < this.#dimension && !ganado; columna++){
+    for (columna = 0; columna < this.#dimension && !ganado; columna++) {
       let seguidas = 0;
-      for (fila = 0; fila < this.#dimension; fila++){
+      for (fila = 0; fila < this.#dimension; fila++) {
         if (fila !== 0) {
-          if (this.getCasilla(fila, columna) === this.getCasilla(fila-1, columna)) {
+          if (this.getCasilla(fila, columna) === this.getCasilla(fila - 1, columna)) {
             if (this.getCasilla(fila, columna) !== null) {
               seguidas++;
             }
@@ -122,11 +160,10 @@ class Tablero {
       }
     }
 
-    // Diagonal de izq a derecha
     let seguidas = 0;
-    for (let i = 0; i < this.#dimension; i++){
+    for (let i = 0; i < this.#dimension; i++) {
       if (i !== 0) {
-        if ((this.getCasilla(i, i) === this.getCasilla(i - 1, i - 1)) && this.getCasilla(i,i) !== null) {
+        if ((this.getCasilla(i, i) === this.getCasilla(i - 1, i - 1)) && this.getCasilla(i, i) !== null) {
           seguidas++;
         }
       }
@@ -137,12 +174,11 @@ class Tablero {
       ganado = true;
     }
 
-    // Diagonal de izq a derecha
     seguidas = 0;
-    for (let i = this.#dimension-1; i >= 0; i--){
+    for (let i = this.#dimension - 1; i >= 0; i--) {
       if (i !== this.#dimension - 1) {
         let j = this.#dimension - 1 - i;
-        if ((this.getCasilla(i, j) === this.getCasilla(i + 1, j - 1)) && this.getCasilla(i,j) !== null) {
+        if ((this.getCasilla(i, j) === this.getCasilla(i + 1, j - 1)) && this.getCasilla(i, j) !== null) {
           seguidas++;
         }
       }
@@ -159,13 +195,13 @@ class Tablero {
         text: `Ha ganado el jugador ${this.#turno}`,
         newWindow: true,
         close: true,
-        gravity: "top", // `top` or `bottom`
-        position: "center", // `left`, `center` or `right`
-        stopOnFocus: true, // Prevents dismissing of toast on hover
+        gravity: "top",
+        position: "center",
+        stopOnFocus: true,
         style: {
           background: "blue",
         },
-        onClick: function(){} // Callback after click
+        onClick: function () { }
       }).showToast();
 
       let libres = document.querySelectorAll('div[data-libre=""]');
@@ -175,26 +211,32 @@ class Tablero {
 
       this.#marcador.addPuntos(this.#turno);
       document.querySelector('.clearGame').classList.toggle('show');
+
+      if (this.#marcador.getRondasJugadas() === this.#maxRondas) {
+        this.imprimirGanador();
+        this.setEndGame();
+      }
+
     } else {
-      // Si no se ha ganado hay que comprobar si el tablero está petao, si es así son tablas
       if (this.isFull()) {
         Toastify({
           text: `Han sido tablas`,
           newWindow: true,
           close: true,
-          gravity: "top", // `top` or `bottom`
-          position: "center", // `left`, `center` or `right`
-          stopOnFocus: true, // Prevents dismissing of toast on hover
+          gravity: "top",
+
+
+          position: "center",
+          stopOnFocus: true,
           style: {
             background: "blue",
           },
-          onClick: function(){} // Callback after click
+          onClick: function () { }
         }).showToast();
         document.querySelector('.clearGame').classList.toggle('show');
         this.#endGame = true;
       }
     }
-
   }
 
   isFull() {
@@ -210,10 +252,19 @@ class Tablero {
           casillaSeleccionada.dataset.fila,
           casillaSeleccionada.dataset.columna,
           this.#turno
-        )
+        );
         casillaSeleccionada.dataset.libre = this.#turno;
+        this.#registroJugadas.push({
+          jugador: this.#turno,
+          casilla: {
+            fila: casillaSeleccionada.dataset.fila,
+            columna: casillaSeleccionada.dataset.columna,
+          },
+          hora: new Date().toLocaleTimeString(),
+        });
         this.comprobarResultados();
         this.toogleTurno();
+        this.imprimirRegistroJugadas();
       }
     });
 
@@ -227,7 +278,18 @@ class Tablero {
       if (e.currentTarget.dataset.libre === '') {
         e.currentTarget.textContent = '';
       }
-    })
+    });
+  }
+
+  imprimirRegistroJugadas() {
+    let registroContainer = document.getElementById('registroJugadas');
+    registroContainer.innerHTML = '';
+
+    this.#registroJugadas.forEach((jugada) => {
+      let jugadaElement = document.createElement('div');
+      jugadaElement.textContent = `El jugador ${jugada.jugador} ha puesto una ficha en la casilla ${jugada.casilla.fila},${jugada.casilla.columna} a las ${jugada.hora}`;
+      registroContainer.appendChild(jugadaElement);
+    });
   }
 
   get dimension() {
@@ -241,8 +303,11 @@ class Tablero {
   limpiar() {
     this.#casillas = this.#casillas.map(casilla => casilla.map(c => null));
     this.#endGame = false;
+    this.#registroJugadas = [];
+    document.getElementById('registroJugadas').innerHTML = '';
     this.imprimir();
     document.querySelector('.clearGame').classList.toggle('show');
+    this.ocultarBotonReiniciar();
   }
 
   getCasillaFreeRandom() {
@@ -250,11 +315,54 @@ class Tablero {
     do {
       i = Math.floor(Math.random() * (this.#dimension));
       j = Math.floor(Math.random() * (this.#dimension));
-    } while (!this.isFree(i, j))
+    } while (!this.isFree(i, j));
     return {
       i: i,
       j: j
+    };
+  }
+
+  setEndGame() {
+    this.#endGame = true;
+  }
+
+  imprimirGanador() {
+    let ganador = this.#turno === 'X' ? 'O' : 'X';
+    if (this.#marcador.getJugadores()[0].puntos === this.#marcador.getJugadores()[1].puntos) {
+      Toastify({
+        text: `Empate después de ${this.#maxRondas} rondas`,
+        newWindow: true,
+        close: true,
+        gravity: "top",
+        position: "center",
+        stopOnFocus: true,
+        style: {
+          background: "blue",
+        },
+        onClick: function () { }
+      }).showToast();
+    } else {
+      Toastify({
+        text: `El ganador es el jugador ${ganador} después de ${this.#maxRondas} rondas`,
+        newWindow: true,
+        close: true,
+        gravity: "top",
+        position: "center",
+        stopOnFocus: true,
+        style: {
+          background: "blue",
+        },
+        onClick: function () { }
+      }).showToast();
     }
+    if (this.#marcador.getRondasJugadas() === this.#maxRondas) {
+      this.ocultarBotonReiniciar();
+    }
+  }
+
+  ocultarBotonReiniciar() {
+    document.querySelector('.resetGame').classList.remove('show');
+    document.querySelector('.clearGameButton').classList.add('show');
   }
 }
 
